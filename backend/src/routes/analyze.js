@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { analyzeText } = require('../services/service');
+const { analyzeText } = require('../services/sentimentService');
 
 router.post('/', async (req, res) => {
   const { sentence } = req.body;
