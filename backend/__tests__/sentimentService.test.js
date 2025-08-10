@@ -3,7 +3,7 @@ const { analyzeText } = require('../src/services/sentimentService');
 describe('Sentiment Service', () => {
   it('should classify positive text', async () => {
     const result = await analyzeText('I love this!');
-    expect(result.sentiment).toBe('negative');
+    expect(result.sentiment).toBe('positive');
   });
 
   it('should classify negative text', async () => {
