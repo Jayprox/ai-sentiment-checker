@@ -1,13 +1,13 @@
 const axios = require('axios');
 require('dotenv').config();
 
-async function analyzeText(sentence) {
+async function analyzeSentiment(sentence) {
   if (!sentence || typeof sentence !== 'string') {
-    throw new Error('Invalid sentence input');
+    throw new Error('Input sentence is required');
   }
 
   // When running in test mode, skip OpenAI and return a fake result
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.MODE === 'test') {
     let sentiment = 'neutral';
     const lower = sentence.toLowerCase();
 
