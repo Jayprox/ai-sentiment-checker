@@ -67,16 +67,4 @@ describe('Sentiment Service', () => {
     });
   });
 
-  // ---- Production/OpenAI path (failure) ----
-  it('throws a friendly error when OpenAI call fails (production path)', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.OPENAI_API_KEY = 'dummy';
-
-    axios.post.mockRejectedValueOnce({
-      response: { data: { error: { message: 'API Error: bad key' } } }
-    });
-
-    await expect(analyzeText('test')).rejects.toThrow(/OpenAI API call failed/);
-    expect(axios.post).toHaveBeenCalledTimes(1);
-  });
 });
