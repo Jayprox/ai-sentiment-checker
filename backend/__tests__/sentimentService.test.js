@@ -1,38 +1,82 @@
+// backend/__tests__/sentimentService.test.js
+const axios = require('axios');
+jest.mock('axios'); // important: prevents real network calls
+
 const { analyzeText } = require('../src/services/sentimentService');
 
 describe('Sentiment Service', () => {
-  it('should classify positive text', async () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // default to test mode so sentiment is mocked by the service
+    process.env = { ...originalEnv, NODE_ENV: 'test' };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  // ---- Test-mode (mock path) ----
+  it('classifies positive text (test mode)', async () => {
     const result = await analyzeText('I love this!');
-    expect(result.sentiment).toBeDefined();
+    expect(result.sentiment).toBe('positive');
+    expect(result.source).toBe('mock');
   });
 
-  it('should classify negative text', async () => {
-    const result = await analyzeText('This is awful!');
-    expect(result.sentiment).toBeDefined();
+  it('classifies negative text (test mode)', async () => {
+    const result = await analyzeText('This is terrible!');
+    expect(result.sentiment).toBe('negative');
+    expect(result.source).toBe('mock');
   });
 
-  it('should classify neutral text', async () => {
+  it('classifies neutral text (test mode)', async () => {
     const result = await analyzeText('This is a pen.');
-    expect(result.sentiment).toBeDefined();
+    expect(result.sentiment).toBe('neutral');
+    expect(result.source).toBe('mock');
   });
 
-  it('should handle empty string gracefully', async () => {
-    // Match current backend behavior: throws "Invalid sentence input"
+  it('throws on invalid/empty input', async () => {
     await expect(analyzeText('')).rejects.toThrow(/Invalid sentence input/i);
+    await expect(analyzeText(null)).rejects.toThrow(/Invalid sentence input/i);
   });
 
-  it('should handle long or special character input', async () => {
-    const longText = '!'.repeat(500);
-    const result = await analyzeText(longText);
-    expect(result.sentiment).toBeDefined();
+  it('handles long/special-character input (test mode)', async () => {
+    const result = await analyzeText('!'.repeat(500));
+    expect(['positive', 'negative', 'neutral']).toContain(result.sentiment);
   });
 
-  it('should catch and return error if API call fails', async () => {
+  // ---- Production/OpenAI path (success) ----
+  it('calls OpenAI and parses response (production path)', async () => {
     process.env.NODE_ENV = 'production';
-    jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('API Error'));
+    process.env.OPENAI_API_KEY = 'dummy';
 
-    await expect(analyzeText('test')).rejects.toThrow(/API Error/);
+    axios.post.mockResolvedValueOnce({
+      data: {
+        choices: [{ message: { content: ' Positive  ' } }],
+        usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
+      }
+    });
 
-    global.fetch.mockRestore();
+    const result = await analyzeText('Great job!');
+    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      sentiment: 'positive',
+      source: 'openai',
+      debug: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
+    });
+  });
+
+  // ---- Production/OpenAI path (failure) ----
+  it('throws a friendly error when OpenAI call fails (production path)', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.OPENAI_API_KEY = 'dummy';
+
+    axios.post.mockRejectedValueOnce({
+      response: { data: { error: { message: 'API Error: bad key' } } }
+    });
+
+    await expect(analyzeText('test')).rejects.toThrow(/OpenAI API call failed/);
+    expect(axios.post).toHaveBeenCalledTimes(1);
   });
 });
