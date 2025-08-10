@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest --coverage"
+    "test": "jest --coverage --detectOpenHandles",
+    "test:ci": "jest --coverage --detectOpenHandles --coverageThreshold='{ \"global\": { \"branches\": 80, \"functions\": 80, \"lines\": 80, \"statements\": 80 } }'"
   },
   "keywords": [],
   "author": "",

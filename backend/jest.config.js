@@ -5,10 +5,29 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'], // lcov is needed for Jenkins HTML report
+
+  // Fail the test run if coverage falls below these thresholds
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80
+    },
+    // Optional: Higher requirement for sentimentService.js
+    './src/services/sentimentService.js': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90
+    }
+  }
 };
-// This configuration file sets up Jest for testing in a Node.js environment.
-// It specifies that tests should be found in the __tests__ directory and have a .test.js suffix.
-// The verbose option is enabled to provide detailed test results in the output.
-// This file is essential for running tests in the backend of the application, ensuring that the test suite is properly configured and can be executed by the CI/CD pipeline.
-// It is typically located at the root of the backend directory, such as backend/jest.config.js.
-// The configuration ensures that the backend tests can be run independently of the frontend, allowing for a clear separation of concerns in the testing process.
+// This configuration file sets up Jest for testing a Node.js backend.
+// It specifies the test environment, file patterns for tests, and coverage settings.
+// The coverage thresholds ensure that the code quality remains high, especially for critical files like sentimentService.js.
+// The configuration is designed to work seamlessly with CI/CD pipelines, such as Jenkins, to enforce code quality standards.
+// Keeps your current test setup
+// Adds a global minimum of 80% coverage for everything
+// Enforces 90% coverage for sentimentService.js specifically
+// Causes Jest (and therefore Jenkins) to fail the build if thresholds aren’t met
