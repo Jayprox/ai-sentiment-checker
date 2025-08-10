@@ -53,4 +53,4 @@ async function analyzeText(sentence) {
   }
 }
 
-module.exports = { analyzeText };
+module.exports = { analyzeSentiment };
