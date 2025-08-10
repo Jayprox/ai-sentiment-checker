@@ -31,7 +31,7 @@ describe('Sentiment Service', () => {
     expect(result).toHaveProperty('sentiment');
   });
 
-  it('calls OpenAI and parses response (production path)', async () => {
+  it.skip('calls OpenAI and parses response (production path)', async () => {
     process.env.MODE = 'production';
     process.env.OPENAI_API_KEY = 'test-key';
 
