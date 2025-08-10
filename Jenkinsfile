@@ -40,7 +40,6 @@ pipeline {
             sh 'npm ci || npm install'
             sh 'npm test'
 
-            // Archive coverage and publish HTML
             archiveArtifacts artifacts: 'coverage/**', onlyIfSuccessful: true
             publishHTML(target: [
               reportDir: 'coverage/lcov-report',
@@ -50,16 +49,6 @@ pipeline {
               alwaysLinkToLastBuild: true,
               allowMissing: false
             ])
-
-            // Compute coverage % and add to build description
-            script {
-              def cov = sh(
-                returnStdout: true,
-                script: 'node -e "console.log(require(\'./coverage/coverage-summary.json\').total.lines.pct)"'
-              ).trim()
-              echo "Backend line coverage: ${cov}%"
-              currentBuild.description = "Backend coverage: ${cov}%"
-            }
           }
         }
       }
