@@ -40,6 +40,7 @@ pipeline {
             sh 'npm ci || npm install'
             sh 'npm test'
 
+            // Archive coverage and publish HTML
             archiveArtifacts artifacts: 'coverage/**', onlyIfSuccessful: true
             publishHTML(target: [
               reportDir: 'coverage/lcov-report',
@@ -50,6 +51,7 @@ pipeline {
               allowMissing: false
             ])
 
+            // Compute coverage % and add to build description
             script {
               def cov = sh(
                 returnStdout: true,
@@ -89,16 +91,3 @@ pipeline {
     }
   }
 }
-// This Jenkinsfile defines a CI/CD pipeline for a Node.js application with both backend and frontend components.
-// It includes stages for checking out the code, installing dependencies, running tests, building the frontend,
-// and archiving artifacts. The pipeline uses Node.js version 20 and ensures that the backend tests
-// are run with coverage reporting. It also publishes HTML reports for the backend coverage.
-// The pipeline is designed to be robust, with error handling and environment management to ensure smooth execution.
-// The backend tests are run in a separate stage, and the frontend build is archived if it exists.
-// The pipeline is structured to provide clear feedback on success or failure, making it suitable for continuous integration and deployment scenarios.
-// It uses the Node.js tool installed in Jenkins and sets up the environment for both backend and frontend directories.
-// The backend tests are run with coverage, and the results are archived and published as HTML reports.
-// The pipeline also captures the backend coverage percentage and includes it in the build description for easy reference.
-// The frontend build is archived if the dist directory exists, ensuring that the build artifacts are available for further stages or deployment.
-// The pipeline is designed to be efficient and maintainable, with clear separation of concerns between backend and frontend tasks.
-// It uses the `node -e` command to extract coverage        
